@@ -85,6 +85,16 @@ sumologic:
   ## creation of Security Context Constraints in Openshift
   scc:
     create: false
+  
+  ## creation of Cluster Role and Cluster Role Binding
+  clusterrole:
+    create: true
+  
+  ## creation of Roles and Role Bindings
+  role:
+    create: false
+    namespaces:
+      - sumologic
 
   setup:
     ## uncomment to force collection installation (disables k8s version verification)

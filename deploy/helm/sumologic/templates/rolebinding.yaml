@@ -1,0 +1,22 @@
+{{- if and .Values.sumologic.role.create }}
+{{- $ctx := . }}
+{{- range $namespace := .Values.sumologic.role.namespaces }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ template "sumologic.metadata.name.roles.clusterrolebinding" $ctx }}
+  namespace: {{ $namespace }}
+  labels:
+    app: {{ template "sumologic.labels.app.roles.clusterrolebinding" $ctx }}
+    {{- include "sumologic.labels.common" $ctx | nindent 4 }}
+subjects:
+- kind: ServiceAccount
+  namespace: {{ $ctx.Release.Namespace }}
+  name: {{ template "sumologic.metadata.name.roles.serviceaccount" $ctx }}
+roleRef:
+  kind: Role
+  name: {{ template "sumologic.metadata.name.roles.clusterrole" $ctx }}
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}
+{{- end }}
