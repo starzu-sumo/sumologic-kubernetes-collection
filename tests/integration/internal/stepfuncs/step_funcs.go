@@ -68,6 +68,27 @@ func HelmDeleteOpt(release string) features.Func {
 	}
 }
 
+// HelmInstallOpt returns a features.Func that will run helm template using the provided path
+// and releaseName as arguments, and save the output in outputFilePath. Values for Helm's
+// --api-versions arguments can be provided via the apiVersions argument
+//
+func HelmTemplateOpt(chartPath string, releaseName string, outputFilePath string, valuesFile string, apiVersions []string) features.Func {
+	return func(ctx context.Context, t *testing.T, envConf *envconf.Config) context.Context {
+		extraHelmArgs := []string{"-f", valuesFile}
+		for _, v := range apiVersions {
+			extraHelmArgs = append(extraHelmArgs, "--api-versions", v)
+		}
+		templatedYaml := helm.RenderTemplate(t, ctxopts.HelmOptions(ctx), chartPath, releaseName, nil, extraHelmArgs...)
+		file, err := os.OpenFile(outputFilePath, os.O_RDWR, 0644)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer file.Close()
+		file.WriteString(templatedYaml)
+		return ctx
+	}
+}
+
 // KubectlDeleteNamespaceOpt returns a features.Func that with delete the provided namespace.
 func KubectlDeleteNamespaceOpt(namespace string) features.Func {
 	return func(ctx context.Context, t *testing.T, envConf *envconf.Config) context.Context {
