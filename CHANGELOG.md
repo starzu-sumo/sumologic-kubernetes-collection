@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- feat: add CRI support to experimental otelcol log collector[#2017][#2017]
 - feat: add batching to experimental otelcol log collector [#2018][#2018]
 - feat: add experimental otelcol log collector [#1986][#1986]
 - feat: add option to disable pod owners enrichment [#1959][#1959]
@@ -37,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [#2013]: https://github.com/SumoLogic/sumologic-kubernetes-collection/pull/2013
 [#2018]: https://github.com/SumoLogic/sumologic-kubernetes-collection/pull/2018
 [#2020]: https://github.com/SumoLogic/sumologic-kubernetes-collection/pull/2020
+[#2017]: https://github.com/SumoLogic/sumologic-kubernetes-collection/pull/2017
 
 ## [v2.3.2][v2_3_2]
 
