@@ -3858,6 +3858,13 @@ metadata:
               record_attributes:
                 - key: fluent.tag
                   value: containers\..+
+        filter/include_containers:
+          logs:
+            include:
+              match_type: regexp
+              record_attributes:
+                - key: k8s.container.name
+                  value: .+
         attributes/containers:
           actions:
             - action: extract
@@ -4070,6 +4077,7 @@ metadata:
               - otlp
             processors:
               - memory_limiter
+              - filter/include_containers
               - attributes/containers
               - groupbyattrs/containers
               - k8s_tagger
@@ -4078,6 +4086,32 @@ metadata:
               - batch
             exporters:
               - sumologic/containers
+          logs/otlp/systemd:
+            receivers:
+              - otlp
+            processors:
+              - memory_limiter
+              - filter/include_systemd
+              - filter/exclude_kubelet
+              - groupbyattrs/systemd
+              - source/systemd
+              - attributes/remove_fluent_tag
+              - batch
+            exporters:
+              - sumologic/systemd
+          logs/otlp/kubelet:
+            receivers:
+              - otlp
+            processors:
+              - memory_limiter
+              - filter/include_kubelet
+              - groupbyattrs/systemd
+              - source/kubelet
+              - attributes/remove_fluent_tag
+              - batch
+            exporters:
+              - sumologic/systemd
+          
     statefulset:
       nodeSelector: {}
       tolerations: []
@@ -4176,6 +4210,13 @@ otellogs:
         logs/containers:
           receivers:
             - filelog/containers
+          processors:
+            - batch
+          exporters:
+            - otlphttp
+        logs/journald:
+          receivers:
+            - journald
           processors:
             - batch
           exporters:
@@ -4349,6 +4390,56 @@ otellogs:
               - move:
                   from: log
                   to: $
+      journald:
+        units:
+          - addon-config
+          - addon-run
+          - cfn-etcd-environment
+          - cfn-signal
+          - clean-ca-certificates
+          - containerd
+          - coreos-metadata
+          - coreos-setup-environment
+          - coreos-tmpfiles
+          - dbus
+          - docker
+          - efs
+          - etcd-member
+          - etcd
+          - etcd2
+          - etcd3
+          - etcdadm-check
+          - etcdadm-reconfigure
+          - etcdadm-save
+          - etcdadm-update-status
+          - flanneld
+          - format-etcd2-volume
+          - kube-node-taint-and-uncordon
+          - kubelet
+          - ldconfig
+          - locksmithd
+          - logrotate
+          - lvm2-monitor
+          - mdmon
+          - nfs-idmapd
+          - nfs-mountd
+          - nfs-server
+          - nfs-utils
+          - node-problem-detector
+          - ntp
+          - oem-cloudinit
+          - rkt-gc
+          - rkt-metadata
+          - rpc-idmapd
+          - rpc-mountd
+          - rpc-statd
+          - rpcbind
+          - set-aws-environment
+          - system-cloudinit
+          - systemd-timesyncd
+          - update-ca-certificates
+          - user-cloudinit
+          - var-lib-etcd2
     exporters:
       otlphttp:
         endpoint: http://${LOGS_METADATA_SVC}.${NAMESPACE}.svc.cluster.local:4318
