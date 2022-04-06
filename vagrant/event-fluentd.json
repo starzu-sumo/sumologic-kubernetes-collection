@@ -1,0 +1,64 @@
+{
+    "timestamp": 1649172081365,
+    "type": "ADDED",
+    "object": {
+        "kind": "Event",
+        "apiVersion": "v1",
+        "metadata": {
+            "name": "receiver-mock.16e3094532d8d067",
+            "namespace": "receiver-mock",
+            "selfLink": "/api/v1/namespaces/receiver-mock/events/receiver-mock.16e3094532d8d067",
+            "uid": "8d319460-9bbc-468e-8e0f-95915af4c640",
+            "resourceVersion": "84936",
+            "creationTimestamp": "2022-04-05T15:21:21Z",
+            "managedFields": [
+                {
+                    "manager": "kubelite",
+                    "operation": "Update",
+                    "apiVersion": "v1",
+                    "time": "2022-04-05T15:21:21Z",
+                    "fieldsType": "FieldsV1",
+                    "fieldsV1": {
+                        "f:count": {},
+                        "f:firstTimestamp": {},
+                        "f:involvedObject": {
+                            "f:apiVersion": {},
+                            "f:kind": {},
+                            "f:name": {},
+                            "f:namespace": {},
+                            "f:resourceVersion": {},
+                            "f:uid": {}
+                        },
+                        "f:lastTimestamp": {},
+                        "f:message": {},
+                        "f:reason": {},
+                        "f:source": {
+                            "f:component": {}
+                        },
+                        "f:type": {}
+                    }
+                }
+            ]
+        },
+        "involvedObject": {
+            "kind": "Deployment",
+            "namespace": "receiver-mock",
+            "name": "receiver-mock",
+            "uid": "67fff84d-d06a-43e7-88c2-91dfe8f87270",
+            "apiVersion": "apps/v1",
+            "resourceVersion": "84934"
+        },
+        "reason": "ScalingReplicaSet",
+        "message": "Scaled up replica set receiver-mock-84c7d59478 to 1",
+        "source": {
+            "component": "deployment-controller"
+        },
+        "firstTimestamp": "2022-04-05T15:21:21Z",
+        "lastTimestamp": "2022-04-05T15:21:21Z",
+        "count": 1,
+        "type": "Normal",
+        "eventTime": null,
+        "reportingComponent": "",
+        "reportingInstance": ""
+    }
+}

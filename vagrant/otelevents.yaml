@@ -1,0 +1,199 @@
+---
+apiVersion: v1
+data:
+  config.yaml: |2
+
+    receivers:
+      k8s_events:
+    extensions:
+      health_check: {}
+      ## Configuration for File Storage extension
+      ## ref: https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/release/v0.37.x/extension/storage/filestorage
+      file_storage:
+        directory: /var/lib/storage/otc
+        timeout: 10s
+      pprof: {}
+    exporters:
+      sumologic:
+        log_format: json
+        # json_logs:
+        #   add_timestamp: true
+        #   timestamp_key: timestamp
+        endpoint: ${SUMO_ENDPOINT_DEFAULT_EVENT_SOURCE}
+        source_name: "%{_sourceName}"
+        source_category: "%{_sourceCategory}"
+        ## Configuration for sending queue
+        ## ref: https://github.com/open-telemetry/opentelemetry-collector/tree/release/v0.37.x/exporter/exporterhelper#configuration
+        sending_queue:
+          enabled: true
+          # persistent_storage_enabled: true
+        metadata_attributes:
+          ## Attributes to be send as fields
+          - _collector
+
+    processors:
+      ## Common processors
+      ## The memory_limiter processor is used to prevent out of memory situations on the collector.
+      memory_limiter:
+        ## check_interval is the time between measurements of memory usage for the
+        ## purposes of avoiding going over the limits. Defaults to zero, so no
+        ## checks will be performed. Values below 1 second are not recommended since
+        ## it can result in unnecessary CPU consumption.
+        check_interval: 5s
+
+        ## Maximum amount of memory, in MiB, targeted to be allocated by the process heap.
+        ## Note that typically the total memory usage of process will be about 50MiB higher
+        ## than this value.
+        limit_mib: 1900
+      ## The batch processor accepts spans and places them into batches grouped by node and resource
+      batch:
+        ## Number of spans after which a batch will be sent regardless of time
+        send_batch_size: 256
+        ## Time duration after which a batch will be sent regardless of size
+        timeout: 5s
+
+      # attributes:
+      #   actions: []
+      groupbyattrs:
+        keys:
+          - k8s.namespace.name
+      # source:
+      #   collector: '{{ .Values.sumologic.collectorName | default .Values.sumologic.clusterName | quote }}'
+      #   source_host: "%{k8s.pod.hostname}"
+      #   source_name: "%{k8s.namespace.name}.%{k8s.pod.name}.%{k8s.container.name}"
+      #   source_category: "%{k8s.namespace.name}/%{k8s.pod.pod_name}"
+      #   source_category_prefix: '{{ .Values.fluentd.logs.containers.sourceCategoryPrefix | quote }}'
+      #   source_category_replace_dash: '{{ .Values.fluentd.logs.containers.sourceCategoryReplaceDash | quote }}'
+
+    service:
+      telemetry:
+        logs:
+          level: info
+      extensions:
+        - health_check
+        - file_storage
+        - pprof
+      pipelines:
+        logs/events:
+          receivers:
+            - k8s_events
+          processors:
+            - memory_limiter
+            # - attributes
+            - groupbyattrs
+            # - source
+            - batch
+          exporters:
+            - sumologic
+kind: ConfigMap
+metadata:
+  labels:
+    app: collection-sumologic-otelcol-events
+  name: collection-sumologic-otelcol-events
+  namespace: sumologic
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: collection-sumologic-otelcol-events
+  name: collection-sumologic-otelcol-events
+  namespace: sumologic
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: collection-sumologic-otelcol-events
+  serviceName: collection-sumologic-otelcol-events-headless
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: collection-sumologic-otelcol-events
+    spec:
+      containers:
+      - args:
+        - --config=/etc/otelcol/config.yaml
+        env:
+        - name: SUMO_ENDPOINT_DEFAULT_EVENT_SOURCE
+          valueFrom:
+            secretKeyRef:
+              key: endpoint-events
+              name: sumologic
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        image: otel/opentelemetry-collector-contrib:0.48.0
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 13133
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: otelcol
+        ports:
+        - containerPort: 1777
+          name: pprof
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 13133
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        volumeMounts:
+        - mountPath: /etc/otelcol
+          name: otelcol-config
+        - mountPath: /var/lib/storage/otc
+          name: buffer
+      dnsPolicy: ClusterFirst
+      initContainers:
+      - command:
+        - sh
+        - -c
+        - |
+          chown -R \
+            0:0 \
+            /var/lib/storage/otc
+        image: busybox
+        imagePullPolicy: Always
+        name: changeowner
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/storage/otc
+          name: buffer
+      restartPolicy: Always
+      serviceAccount: collection-sumologic
+      serviceAccountName: collection-sumologic
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: config.yaml
+            path: config.yaml
+          name: collection-sumologic-otelcol-events
+        name: otelcol-config
+  volumeClaimTemplates:                                                                                                                                                                            
+   - apiVersion: v1                                                                                                                                                                                 
+     kind: PersistentVolumeClaim                                                                                                                                                                    
+     metadata:                                                                                                                                                                                                                                                                                                                                                       
+       name: buffer                                                                                                                                                                                 
+     spec:                                                                                                                                                                                          
+       accessModes:                                                                                                                                                                                 
+       - ReadWriteOnce                                                                                                                                                                              
+       resources:                                                                                                                                                                                   
+         requests:                                                                                                                                                                                  
+           storage: 10Gi                                                                                                                                                                            
+       volumeMode: Filesystem

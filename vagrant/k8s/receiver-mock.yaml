@@ -35,6 +35,8 @@ spec:
           args:
             - receiver-mock
             - --hostname=receiver-mock.receiver-mock
+            - --print-headers
+            - --print-logs
           resources: {}
           securityContext:
             capabilities:
