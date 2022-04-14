@@ -1,10 +1,17 @@
 ---
 apiVersion: v1
+kind: Namespace
+metadata:
+  name: sumologic
+---
+
+---
+apiVersion: v1
 data:
   config.yaml: |2
 
     receivers:
-      k8s_events:
+      raw_k8s_events:
     extensions:
       health_check: {}
       ## Configuration for File Storage extension
@@ -14,6 +21,7 @@ data:
         timeout: 10s
       pprof: {}
     exporters:
+      logging:
       sumologic:
         log_format: json
         # json_logs:
@@ -76,7 +84,7 @@ data:
       pipelines:
         logs/events:
           receivers:
-            - k8s_events
+            - raw_k8s_events
           processors:
             - memory_limiter
             # - attributes
@@ -85,6 +93,7 @@ data:
             - batch
           exporters:
             - sumologic
+            - logging
 kind: ConfigMap
 metadata:
   labels:
@@ -125,8 +134,8 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: metadata.namespace
-        image: otel/opentelemetry-collector-contrib:0.48.0
-        imagePullPolicy: IfNotPresent
+        image: localhost:5001/sumologic-otel-collector-dev:latest
+        imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 3
           httpGet:

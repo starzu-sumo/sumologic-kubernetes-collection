@@ -1,0 +1,36 @@
+{
+    "count": 1,
+    "eventTime": null,
+    "firstTimestamp": "2022-04-12T18:09:37Z",
+    "involvedObject": {
+        "apiVersion": "v1",
+        "fieldPath": "spec.containers{otelcol}",
+        "kind": "Pod",
+        "name": "collection-sumologic-otelcol-events-0",
+        "namespace": "sumologic",
+        "resourceVersion": "9693",
+        "uid": "4adb8132-3502-445c-8c62-25e19c75c65a"
+    },
+    "lastTimestamp": "2022-04-12T18:09:37Z",
+    "log": "Stopping container otelcol",
+    "message": "Stopping container otelcol",
+    "metadata": {
+        "creationTimestamp": "2022-04-12T18:09:37Z",
+        "managedFields": [
+            "\u003cInvalid array value\u003e"
+        ],
+        "name": "collection-sumologic-otelcol-events-0.16e53883ef46b340",
+        "namespace": "sumologic",
+        "resourceVersion": "9880",
+        "uid": "1bea661c-bcbe-44d6-9b44-004d6272e2eb"
+    },
+    "reason": "Killing",
+    "reportingComponent": "",
+    "reportingInstance": "",
+    "source": {
+        "component": "kubelet",
+        "host": "sumologic-control-plane"
+    },
+    "timestamp": 1649786977000,
+    "type": "Normal"
+}

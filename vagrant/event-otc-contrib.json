@@ -1,0 +1,18 @@
+{
+    "k8s.cluster.name": "",
+    "k8s.event.action": "",
+    "k8s.event.count": 1,
+    "k8s.event.name": "aa-cloudops-kernel.16e34f849409aed4",
+    "k8s.event.reason": "Killing",
+    "k8s.event.start_time": "2022-04-06 12:48:39 +0000 UTC",
+    "k8s.event.uid": "74e25544-8cdc-4789-9f39-e60b0b661274",
+    "k8s.namespace.name": "stage",
+    "k8s.node.name": "sumologic-kubernetes-collection",
+    "k8s.object.api_version": "v1",
+    "k8s.object.fieldpath": "spec.containers{kernel-kernel}",
+    "k8s.object.kind": "Pod",
+    "k8s.object.name": "aa-cloudops-kernel",
+    "k8s.object.resource_version": "77204",
+    "k8s.object.uid": "49ee38ef-e430-402b-af37-56603e28d801",
+    "log": "Stopping container kernel-kernel"
+}
